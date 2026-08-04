@@ -1,0 +1,9 @@
+create database dwh_project;
+go
+
+use dwh_project;
+go
+
+create schema bronze;
+create schema silver;
+create schema gold; 
