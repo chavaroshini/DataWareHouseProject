@@ -1,4 +1,4 @@
-create database dwh_project;
+ create database dwh_project;
 go
 
 use dwh_project;
