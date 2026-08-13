@@ -1,124 +1,73 @@
+create database dwh_project;
+go
 
-CREATE OR ALTER PROCEDURE sp_load_bronze as
-BEGIN
-declare @b_start_time datetime,@b_end_time datetime;
-set @b_start_time = getdate()
+use dwh_project;
+go
 
-declare @start_time datetime,@end_time datetime;
-begin try
-print '======================================================================================='
-print '                                loading bronze layer'
-print '======================================================================================='
-print '---------------------------------------------------------------------------------------'
-print '                                loading crm tables'
-print '---------------------------------------------------------------------------------------'
+create schema bronze;
+create schema silver;
+create schema gold;
 
-set @start_time = getdate()
-truncate table bronze.crm_cust_info
+if object_id('bronze.crm_cust_info','U') is not null
+drop table bronze.crm_cust_info;
 
-bulk insert bronze.crm_cust_info
-from  'C:\Users\chava\OneDrive\Desktop\DesIDEA\sql-data-warehouse-project-main\datasets\source_crm\cust_info.csv'
-with(
-firstrow = 2,
-fieldterminator = ',',
-tablock
+
+create table bronze.crm_cust_info(
+cust_id int,
+cust_key nvarchar(50),
+cust_firstname nvarchar(50),
+cust_lastname nvarchar(50),
+cust_material_status nvarchar(50),
+cust_gndr nvarchar(50),
+cust_create_date date
+ 
 );
-set @end_time = getdate()
-print '>> load duration:' + cast(datediff(second,@start_time,@end_time) as nvarchar)+'sec'
 
 
-set @start_time = getdate()
+if object_id('bronze.crm_prd_info','U') is not null
+drop table bronze.crm_prd_info;
+create table bronze.crm_prd_info(
+prd_id int,
+prd_key nvarchar(50),
+prd_nm nvarchar(50),
+prd_cost int,
+prd_line nvarchar(50),
+prd_start_dt datetime,
+prd_end_dt datetime
 
-truncate table bronze.crm_prd_info
-bulk insert bronze.crm_prd_info
-from  'C:\Users\chava\OneDrive\Desktop\DesIDEA\sql-data-warehouse-project-main\datasets\source_crm\prd_info.csv'
-with(
-firstrow = 2,
-fieldterminator = ',',
-tablock
 );
-set @end_time = getdate()
-print '>> load duration:' + cast(datediff(second,@start_time,@end_time) as nvarchar)+'sec'
 
 
-
-set @start_time = getdate()
-
-truncate table bronze.crm_sales_details
-bulk insert bronze.crm_sales_details
-from  'C:\Users\chava\OneDrive\Desktop\DesIDEA\sql-data-warehouse-project-main\datasets\source_crm\sales_details.csv'
-with(
-firstrow = 2,
-fieldterminator = ',',
-tablock
+if object_id('bronze.crm_sales_details','U') is not null
+drop table bronze.bronze.crm_sales_details
+create table bronze.crm_sales_details(
+sls_ord_num nvarchar(50),
+sls_prd_key nvarchar(50),
+sls_cust_id int,
+sls_order_dt int,
+sls_ship_dt int,
+sls_due_dt int,
+sls_sales int,
+sls_quantity int,
+sls_price int
 );
-set @end_time = getdate()
-print '>> load duration:' + cast(datediff(second,@start_time,@end_time) as nvarchar)+'sec'
 
+drop table bronze.crm_sales_details
 
-print '---------------------------------------------------------------------------------------'
-print '                                loading erp tables'
-print '---------------------------------------------------------------------------------------'
+create table bronze.LOC_A101(
+cid nvarchar(50),
+cntry nvarchar(50)
+)
 
+create table bronze.CUST_AZ12(
+cid nvarchar(50),
+bdate date,
+gen nvarchar(50)
+)
 
-----------------erp
-set @start_time = getdate()
-
-truncate table bronze.erp_cat_g1v2
-bulk insert bronze.CUST_AZ12
-from  'C:\Users\chava\OneDrive\Desktop\DesIDEA\sql-data-warehouse-project-main\datasets\source_erp\CUST_AZ12.csv'
-with(
-firstrow = 2,
-fieldterminator = ',',
-tablock
-);
-set @end_time = getdate()
-print '>> load duration:' + cast(datediff(second,@start_time,@end_time) as nvarchar)+'sec'
-
-
-set @start_time = getdate()
-
-truncate table bronze.erp_cat_g1v2
-bulk insert bronze.LOC_A101
-from  'C:\Users\chava\OneDrive\Desktop\DesIDEA\sql-data-warehouse-project-main\datasets\source_erp\LOC_A101.csv'
-with(
-firstrow = 2,
-fieldterminator = ',',
-tablock
-);
-set @end_time = getdate()
-print '>> load duration:' + cast(datediff(second,@start_time,@end_time) as nvarchar)+'sec'
-
-
-set @start_time = getdate()
-
-truncate table bronze.erp_cat_g1v2
-bulk insert bronze.PX_CAT_G1V2
-from  'C:\Users\chava\OneDrive\Desktop\DesIDEA\sql-data-warehouse-project-main\datasets\source_erp\PX_CAT_G1V2.csv'
-with(
-firstrow = 2,
-fieldterminator = ',',
-tablock
-);
-set @end_time = getdate()
-print '>> load duration:' + cast(datediff(second,@start_time,@end_time) as nvarchar)+'sec'
-
-set @b_end_time = getdate()
-print '>> load duration of total bronze layer:' + cast(datediff(second,@b_start_time,@b_end_time) as nvarchar)+'sec'
-
-end try
-
-
-begin catch 
-   print '=========================================';
-   print'error occured during loading bronze layer'
-   print 'error message' + error_message();
-   print '=========================================';
-
-end catch 
-
-END
-
-
-
--- exec sp_load_bronze
+create table bronze.PX_CAT_G1V2(
+id nvarchar(50),
+cat nvarchar(50),
+subcat nvarchar(50),
+mainteneance nvarchar(50)
+)
